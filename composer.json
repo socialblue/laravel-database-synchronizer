@@ -1,6 +1,6 @@
 {
     "name": "mtolhuijs/laravel-database-synchronizer",
-    "description": ":",
+    "description": "Synchronize your production and development databases with a simple command",
     "license": "MIT",
     "authors": [
         {
