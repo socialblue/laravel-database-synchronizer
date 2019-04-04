@@ -63,6 +63,6 @@ license. Please see the [license file](license.md) for more information.
 [link-downloads]: https://packagist.org/packages/mtolhuijs/laravel-database-synchronizer
 [link-travis]: https://travis-ci.org/mtolhuijs/laravel-database-synchronizer
 [link-styleci]: https://styleci.io/repos/177603107
-[link-scrutinizer]: https://scrutinizer-ci.com/g/mtolhuys/laravel-database-synchronizer/?branch=master
+
 [link-author]: https://github.com/mtolhuys
 [link-contributors]: ../../contributors
