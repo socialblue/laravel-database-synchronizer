@@ -54,19 +54,19 @@ class Synchronise extends Command
             return;
         }
 
-        $this->info(PHP_EOL . 'Synchronization done!');
+        $this->info(PHP_EOL.'Synchronization done!');
     }
 
     private function getTables()
     {
         return empty($this->option('tables')) ?
-            config('database-synchronizer.tables') : $this->option('tables') ;
+            config('database-synchronizer.tables') : $this->option('tables');
     }
 
     private function getSkipTables()
     {
         return empty($this->option('skip-tables')) ?
-            config('database-synchronizer.skip_tables') : $this->option('skip-tables') ;
+            config('database-synchronizer.skip_tables') : $this->option('skip-tables');
     }
 
     private function getLimit()
