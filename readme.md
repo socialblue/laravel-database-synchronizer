@@ -28,10 +28,10 @@ This package comes with 1 command:
 db:sync
 { --from= : Synchronize data from this database instead of the one specified in config }
 { --to= : Synchronize data to this database instead of the one specified in config }
-{ --t|table=* : Only run for given table(s) (Only used if optional --tables is given) }
+{ --t|tables=* : Only run for given table(s) }
+{ --st|skip-tables=* : Skip given table(s) }
 { --l|limit= : Limit query rows (defaults to 5000) }
 { --truncate : Truncate before inserting data }
-{ --tables : Use tables specified through config or options }
 ```
 
 ## Change log
