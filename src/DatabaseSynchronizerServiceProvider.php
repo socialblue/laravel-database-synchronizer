@@ -25,9 +25,9 @@ class DatabaseSynchronizerServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->mergeConfigFrom(__DIR__ . '/../config/database-synchronizer.php', 'database-synchronizer');
+        $this->mergeConfigFrom(__DIR__.'/../config/database-synchronizer.php', 'database-synchronizer');
     }
-    
+
     /**
      * Console-specific booting.
      *
