@@ -8,7 +8,7 @@ use Illuminate\Database\Schema\Blueprint;
 
 class DatabaseSynchronizer
 {
-    const DEFAULT_LIMIT = 5000;
+    public const DEFAULT_LIMIT = 5000;
 
     public $cli;
     public $limit = self::DEFAULT_LIMIT;

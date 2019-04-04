@@ -4,6 +4,6 @@ return [
     'from' => 'production',
     'to' => 'staging',
     'tables' => [],
-    'skipTabels' => [],
+    'skip_tables' => [],
     'limit' => 5000,
 ];

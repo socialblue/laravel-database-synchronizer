@@ -39,7 +39,7 @@ class Synchronise extends Command
             $this->option('to') ?? config('database-synchronizer.to'),
             $this
         ))->setTables($this->option('tables') ?? config('database-synchronizer.tables', []))
-           ->setSkipTables($this->option('skiptables') ?? config('database-synchronizer.skiptables', []))
+           ->setSkipTables($this->option('skip_tables') ?? config('database-synchronizer.skip_tables'))
            ->setLimit($this->option('limit') ?? config('database-synchronizer.limit', DatabaseSynchronizer::DEFAULT_LIMIT))
            ->run();
 
