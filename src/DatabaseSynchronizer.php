@@ -8,9 +8,12 @@ use Illuminate\Database\Schema\Blueprint;
 
 class DatabaseSynchronizer
 {
+    const DEFAULT_LIMIT = 5000;
+
     public $cli;
-    public $limit = 5000;
+    public $limit = self::DEFAULT_LIMIT;
     public $tables;
+    public $skipTables;
     public $from;
     public $to;
 
@@ -34,6 +37,27 @@ class DatabaseSynchronizer
 
             exit();
         }
+    }
+
+    public function setSkipTables($skipTables)
+    {
+        $this->skipTables = $skipTables;
+
+        return $this;
+    }
+
+    public function setTables($tables)
+    {
+        $this->tables = $tables;
+
+        return $this;
+    }
+
+    public function setLimit($limit)
+    {
+        $this->limit = $limit;
+
+        return $this;
     }
 
     protected function getFromDb()
@@ -143,11 +167,15 @@ class DatabaseSynchronizer
 
     public function getTables(): array
     {
-        if (! empty($this->tables)) {
-            return $this->tables;
+        if (empty($this->tables)) {
+            $this->tables = $this->getFromDb()->getDoctrineSchemaManager()->listTableNames();
         }
 
-        return $this->getFromDb()->getDoctrineSchemaManager()->listTableNames();
+        $skipTables = $this->skipTables;
+
+        return array_filter($this->tables, function ($val) use ($skipTables) {
+            return ! in_array($val, $skipTables);
+        });
     }
 
     private function createTable(string $table, array $columns): void
