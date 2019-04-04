@@ -46,7 +46,6 @@ class DatabaseSynchronizer
         return $this;
     }
 
-
     public function setTables($tables)
     {
         $this->tables = $tables;
@@ -60,7 +59,6 @@ class DatabaseSynchronizer
 
         return $this;
     }
-
 
     protected function getFromDb()
     {
@@ -176,7 +174,7 @@ class DatabaseSynchronizer
         $skipTables = $this->skipTables;
 
         return array_filter($this->tables, function ($val) use ($skipTables) {
-            return !in_array($val, $skipTables);
+            return ! in_array($val, $skipTables);
         });
     }
 

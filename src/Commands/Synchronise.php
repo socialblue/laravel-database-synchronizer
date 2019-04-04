@@ -34,15 +34,14 @@ class Synchronise extends Command
      */
     public function handle()
     {
-       (new DatabaseSynchronizer(
+        (new DatabaseSynchronizer(
             $this->option('from') ?? config('database-synchronizer.from'),
             $this->option('to') ?? config('database-synchronizer.to'),
             $this
-        )) ->setTables($this->option('tables') ?? config('database-synchronizer.tables', []))
+        ))->setTables($this->option('tables') ?? config('database-synchronizer.tables', []))
            ->setSkipTables($this->option('skiptables') ?? config('database-synchronizer.skiptables', []))
            ->setLimit($this->option('limit') ?? config('database-synchronizer.limit', DatabaseSynchronizer::DEFAULT_LIMIT))
            ->run();
-
 
         $this->info(PHP_EOL.'Synchronization done!');
     }

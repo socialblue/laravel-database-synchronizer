@@ -5,5 +5,5 @@ return [
     'to' => 'staging',
     'tables' => [],
     'skipTabels' => [],
-    'limit' => 5000
+    'limit' => 5000,
 ];
