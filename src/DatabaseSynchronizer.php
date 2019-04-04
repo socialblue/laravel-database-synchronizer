@@ -3,21 +3,19 @@
 namespace mtolhuijs\LDS;
 
 use Illuminate\Support\Facades\DB;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
 
 class DatabaseSynchronizer
 {
-    public
-        $cli,
-        $limit = 5000,
-        $tables,
-        $from,
-        $to;
+    public $cli;
+    public $limit = 5000;
+    public $tables;
+    public $from;
+    public $to;
 
-    private
-        $fromDB,
-        $toDB;
+    private $fromDB;
+    private $toDB;
 
     public function __construct(string $from, string $to, $cli = false)
     {
@@ -41,7 +39,7 @@ class DatabaseSynchronizer
     public function run(): void
     {
         foreach ($this->getTables() as $table) {
-            $this->feedback(PHP_EOL.PHP_EOL . "Table: $table", 'line');
+            $this->feedback(PHP_EOL.PHP_EOL."Table: $table", 'line');
 
             $this->syncTable($table);
             $this->syncRows($table);
@@ -50,7 +48,7 @@ class DatabaseSynchronizer
 
     /**
      * Check if tables and columns are present
-     * Create or update them if not
+     * Create or update them if not.
      *
      * @param string $table
      */
@@ -75,7 +73,7 @@ class DatabaseSynchronizer
     }
 
     /**
-     * Fetch all rows in $this->from and insert or update $this->to
+     * Fetch all rows in $this->from and insert or update $this->to.
      *
      * @param string $table
      */
@@ -98,9 +96,9 @@ class DatabaseSynchronizer
             $exists = $this->toDB->table($table)->where($queryColumn, $row->{$queryColumn})->first();
 
             if (! $exists) {
-                $this->toDB->table($table)->insert((array)$row);
+                $this->toDB->table($table)->insert((array) $row);
             } else {
-                $this->toDB->table($table)->where($queryColumn, $row->{$queryColumn})->update((array)$row);
+                $this->toDB->table($table)->where($queryColumn, $row->{$queryColumn})->update((array) $row);
             }
 
             if (isset($bar)) {
@@ -115,7 +113,7 @@ class DatabaseSynchronizer
 
     public function getTables(): array
     {
-        if (!empty($this->tables)) {
+        if (! empty($this->tables)) {
             return $this->tables;
         }
 
@@ -126,7 +124,7 @@ class DatabaseSynchronizer
     {
         $this->feedback("Creating '$this->to.$table' table", 'warn');
 
-        Schema::connection($this->to)->create($table, function (Blueprint $table_bp) use($table, $columns) {
+        Schema::connection($this->to)->create($table, function (Blueprint $table_bp) use ($table, $columns) {
             foreach ($columns as $column) {
                 $type = Schema::connection($this->from)->getColumnType($table, $column);
 
@@ -153,7 +151,7 @@ class DatabaseSynchronizer
         if ($this->cli) {
             $this->cli->{$type}($msg);
         } else {
-            echo PHP_EOL . $msg . PHP_EOL;
+            echo PHP_EOL.$msg.PHP_EOL;
         }
     }
 }
