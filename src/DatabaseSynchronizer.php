@@ -5,16 +5,20 @@ namespace mtolhuijs\LDS;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\ConnectionInterface;
 use mtolhuijs\LDS\Exceptions\DatabaseConnectionException;
 
 class DatabaseSynchronizer
 {
+    public const DEFAULT_LIMIT = 5000;
+
     public $cli;
-    public $limit = 5000;
+    public $limit = self::DEFAULT_LIMIT;
     public $tables;
+    public $skipTables;
     public $from;
     public $to;
-    public $truncate = false;
+    public $truncate;
 
     private $fromDB;
     private $toDB;
@@ -23,10 +27,7 @@ class DatabaseSynchronizer
     {
         $this->from = $from;
         $this->to = $to;
-
-        if ($cli) {
-            $this->cli = $cli;
-        }
+        $this->cli = $cli;
 
         try {
             $this->fromDB = DB::connection($this->from);
@@ -36,7 +37,39 @@ class DatabaseSynchronizer
         }
     }
 
-    protected function getFromDb(): \Illuminate\Database\ConnectionInterface
+    public function setSkipTables(array $skipTables)
+    {
+        $this->skipTables = $skipTables;
+
+        return $this;
+    }
+
+    public function setTables(array $tables)
+    {
+        $this->tables = $tables;
+
+        return $this;
+    }
+
+    public function setLimit(int $limit)
+    {
+        $this->limit = $limit;
+
+        return $this;
+    }
+
+    public function setOptions(array $options)
+    {
+        foreach ($options as $option => $value) {
+            if (! isset($this->{$option})) {
+                $this->{$option} = $value;
+            }
+        }
+
+        return $this;
+    }
+
+    protected function getFromDb(): ConnectionInterface
     {
         if ($this->fromDB === null) {
             $this->fromDB = DB::connection($this->from);
@@ -45,13 +78,24 @@ class DatabaseSynchronizer
         return $this->fromDB;
     }
 
-    protected function getToDb(): \Illuminate\Database\ConnectionInterface
+    protected function getToDb(): ConnectionInterface
     {
         if ($this->toDB === null) {
             $this->toDB = DB::connection($this->to);
         }
 
         return $this->toDB;
+    }
+
+    public function getTables(): array
+    {
+        if (empty($this->tables)) {
+            $this->tables = $this->getFromDb()->getDoctrineSchemaManager()->listTableNames();
+        }
+
+        return array_filter($this->tables, function ($table) {
+            return ! in_array($table, $this->skipTables, true);
+        });
     }
 
     public function run(): void
@@ -149,11 +193,6 @@ class DatabaseSynchronizer
         if (isset($bar)) {
             $bar->finish();
         }
-    }
-
-    public function getTables(): array
-    {
-        return $this->tables ?? $this->getFromDb()->getDoctrineSchemaManager()->listTableNames();
     }
 
     private function createTable(string $table, array $columns): void
