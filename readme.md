@@ -1,3 +1,10 @@
+# Laravel database synchronizer
+[![Latest Version on Packagist][ico-version]][link-packagist]
+[![Total Downloads][ico-downloads]][link-downloads]
+[![Build Status][ico-travis]][link-travis]
+[![StyleCI][ico-styleci]][link-styleci]
+[![Scrutinizer Code Quality][ico-scrutinizer]][link-scrutinizer]
+
 # Keep your production and development databases in sync
 
 This package will completely synchronize the database specified as "from" and "to" in the config or through the command options.
@@ -46,14 +53,16 @@ If you discover any security related issues, please email author email instead o
 
 license. Please see the [license file](license.md) for more information.
 
-[ico-version]: https://img.shields.io/packagist/v/mtolhuijs/lrm.svg?style=flat-square
-[ico-downloads]: https://img.shields.io/packagist/dt/mtolhuijs/lrm.svg?style=flat-square
-[ico-travis]: https://img.shields.io/travis/mtolhuijs/lrm/master.svg?style=flat-square
-[ico-styleci]: https://styleci.io/repos/12345678/shield
+[ico-version]: https://img.shields.io/packagist/v/mtolhuijs/laravel-database-synchronizer.svg?style=flat-square
+[ico-downloads]: https://img.shields.io/packagist/dt/mtolhuijs/laravel-database-synchronizer.svg?style=flat-square
+[ico-travis]: https://api.travis-ci.com/mtolhuys/laravel-database-synchronizer.svg?branch=master
+[ico-styleci]: https://styleci.io/repos/177603107/shield
+[ico-scrutinizer]: https://scrutinizer-ci.com/g/mtolhuys/laravel-database-synchronizer/badges/quality-score.png?b=master
 
-[link-packagist]: https://packagist.org/packages/mtolhuijs/lrm
-[link-downloads]: https://packagist.org/packages/mtolhuijs/lrm
-[link-travis]: https://travis-ci.org/mtolhuijs/lrm
-[link-styleci]: https://styleci.io/repos/12345678
+[link-packagist]: https://packagist.org/packages/mtolhuijs/laravel-database-synchronizer
+[link-downloads]: https://packagist.org/packages/mtolhuijs/laravel-database-synchronizer
+[link-travis]: https://travis-ci.org/mtolhuijs/laravel-database-synchronizer
+[link-styleci]: https://styleci.io/repos/177603107
+[link-scrutinizer]: https://scrutinizer-ci.com/g/mtolhuys/laravel-database-synchronizer/?branch=master
 [link-author]: https://github.com/mtolhuys
 [link-contributors]: ../../contributors
