@@ -55,7 +55,7 @@ license. Please see the [license file](license.md) for more information.
 
 [ico-version]: https://img.shields.io/packagist/v/mtolhuijs/laravel-database-synchronizer.svg?style=flat-square
 [ico-downloads]: https://img.shields.io/packagist/dt/mtolhuijs/laravel-database-synchronizer.svg?style=flat-square
-[ico-travis]: https://img.shields.io/travis/mtolhuijs/laravel-database-synchronizer/master.svg?style=flat-square
+[ico-travis]: https://api.travis-ci.com/mtolhuys/laravel-database-synchronizer.svg?branch=master
 [ico-styleci]: https://styleci.io/repos/177603107/shield
 [ico-scrutinizer]: https://scrutinizer-ci.com/g/mtolhuys/laravel-database-synchronizer/badges/quality-score.png?b=master
 
