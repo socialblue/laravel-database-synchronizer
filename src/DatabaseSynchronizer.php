@@ -5,6 +5,8 @@ namespace mtolhuijs\LDS;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
+use mtolhuijs\LDS\Exceptions\DatabaseConnectionException;
+use mysql_xdevapi\Exception;
 
 class DatabaseSynchronizer
 {
@@ -13,6 +15,7 @@ class DatabaseSynchronizer
     public $tables;
     public $from;
     public $to;
+    public $truncate = false;
 
     private $fromDB;
     private $toDB;
@@ -30,13 +33,11 @@ class DatabaseSynchronizer
             $this->fromDB = DB::connection($this->from);
             $this->toDB = DB::connection($this->to);
         } catch (\Exception $e) {
-            $this->feedback($e->getMessage(), 'error');
-
-            exit();
+            throw new DatabaseConnectionException($e->getMessage());
         }
     }
 
-    protected function getFromDb()
+    protected function getFromDb(): \Illuminate\Database\ConnectionInterface
     {
         if ($this->fromDB === null) {
             $this->fromDB = DB::connection($this->from);
@@ -45,7 +46,7 @@ class DatabaseSynchronizer
         return $this->fromDB;
     }
 
-    protected function getToDb()
+    protected function getToDb(): \Illuminate\Database\ConnectionInterface
     {
         if ($this->toDB === null) {
             $this->toDB = DB::connection($this->to);
@@ -58,6 +59,12 @@ class DatabaseSynchronizer
     {
         foreach ($this->getTables() as $table) {
             $this->feedback(PHP_EOL.PHP_EOL."Table: $table", 'line');
+
+            if (! Schema::connection($this->from)->hasTable($table)) {
+                $this->feedback("Table '$table' does not exist in $this->from", 'error');
+
+                continue;
+            }
 
             $this->syncTable($table);
             $this->syncRows($table);
@@ -100,7 +107,7 @@ class DatabaseSynchronizer
      */
     public function syncRows(string $table): void
     {
-        $queryColumn = $this->getFromDb()->getColumnListing($table)[0];
+        $queryColumn = Schema::connection($this->from)->getColumnListing($table)[0];
         $pdo = $this->getFromDb()->getPdo();
 
         $builder = $this->fromDB->table($table);
@@ -120,6 +127,10 @@ class DatabaseSynchronizer
             } else {
                 $this->feedback('No rows...', 'comment');
             }
+        }
+
+        if ($this->truncate) {
+            $this->getToDb()->table($table)->truncate();
         }
 
         while ($row = $statement->fetch(\PDO::FETCH_OBJ)) {
@@ -143,11 +154,7 @@ class DatabaseSynchronizer
 
     public function getTables(): array
     {
-        if (! empty($this->tables)) {
-            return $this->tables;
-        }
-
-        return $this->getFromDb()->getDoctrineSchemaManager()->listTableNames();
+        return $this->tables ?? $this->getFromDb()->getDoctrineSchemaManager()->listTableNames();
     }
 
     private function createTable(string $table, array $columns): void
