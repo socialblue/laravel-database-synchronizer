@@ -94,7 +94,7 @@ class DatabaseSynchronizer
         }
 
         return array_filter($this->tables, function ($table) {
-            return !in_array($table, $this->skipTables, true);
+            return ! in_array($table, $this->skipTables, true);
         });
     }
 
