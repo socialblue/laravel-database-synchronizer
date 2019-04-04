@@ -6,7 +6,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use mtolhuijs\LDS\Exceptions\DatabaseConnectionException;
-use mysql_xdevapi\Exception;
 
 class DatabaseSynchronizer
 {

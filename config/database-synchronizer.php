@@ -3,5 +3,5 @@
 return [
     'from' => 'production',
     'to' => 'staging',
-    'tables' => []
+    'tables' => [],
 ];
