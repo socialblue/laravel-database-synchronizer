@@ -36,6 +36,22 @@ class DatabaseSynchronizer
         }
     }
 
+    protected function getFromDb()
+    {
+        if ($this->fromDB === null) {
+            $this->fromDB = DB::connection($this->from);
+        }
+        return $this->fromDB;
+    }
+
+    protected function getToDb()
+    {
+        if ($this->toDB === null) {
+            $this->toDB = DB::connection($this->to);
+        }
+        return $this->toDB;
+    }
+
     public function run(): void
     {
         foreach ($this->getTables() as $table) {
@@ -73,15 +89,27 @@ class DatabaseSynchronizer
     }
 
     /**
-     * Fetch all rows in $this->from and insert or update $this->to.
+     * Fetch all rows in $this->from and insert or update $this->to
+     * @todo need to get the real primary key
+     * @todo add limit offset setup
+     * @todo investigate: insert into on duplicate key update
      *
      * @param string $table
      */
     public function syncRows(string $table): void
     {
-        $queryColumn = Schema::connection($this->from)->getColumnListing($table)[0];
-        $rows = $this->fromDB->table($table)->orderBy($queryColumn, 'DESC')->take($this->limit)->get();
-        $amount = count($rows);
+        $queryColumn = $this->getFromDb()->getColumnListing($table)[0];
+        $pdo = $this->getFromDb()->getPdo();
+
+        $builder = $this->fromDB->table($table);
+        $statement = $pdo->prepare($builder->toSql());
+
+        if (!$statement instanceof  \PDOStatement) {
+            return;
+        }
+
+        $statement->execute($builder->getBindings());
+        $amount = $statement->rowCount();
 
         if ($this->cli) {
             if ($amount > 0) {
@@ -92,13 +120,13 @@ class DatabaseSynchronizer
             }
         }
 
-        foreach ($rows as $row) {
-            $exists = $this->toDB->table($table)->where($queryColumn, $row->{$queryColumn})->first();
+        while ($row = $statement->fetch(\PDO::FETCH_OBJ)) {
+            $exists = $this->getToDb()->table($table)->where($queryColumn, $row->{$queryColumn})->first();
 
             if (! $exists) {
-                $this->toDB->table($table)->insert((array) $row);
+                $this->getToDb()->table($table)->insert((array)$row);
             } else {
-                $this->toDB->table($table)->where($queryColumn, $row->{$queryColumn})->update((array) $row);
+                $this->getToDb()->table($table)->where($queryColumn, $row->{$queryColumn})->update((array)$row);
             }
 
             if (isset($bar)) {
@@ -117,7 +145,7 @@ class DatabaseSynchronizer
             return $this->tables;
         }
 
-        return DB::connection($this->from)->getDoctrineSchemaManager()->listTableNames();
+        return $this->getFromDb()->getDoctrineSchemaManager()->listTableNames();
     }
 
     private function createTable(string $table, array $columns): void
