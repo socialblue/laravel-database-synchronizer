@@ -41,6 +41,7 @@ class DatabaseSynchronizer
         if ($this->fromDB === null) {
             $this->fromDB = DB::connection($this->from);
         }
+
         return $this->fromDB;
     }
 
@@ -49,6 +50,7 @@ class DatabaseSynchronizer
         if ($this->toDB === null) {
             $this->toDB = DB::connection($this->to);
         }
+
         return $this->toDB;
     }
 
@@ -89,7 +91,7 @@ class DatabaseSynchronizer
     }
 
     /**
-     * Fetch all rows in $this->from and insert or update $this->to
+     * Fetch all rows in $this->from and insert or update $this->to.
      * @todo need to get the real primary key
      * @todo add limit offset setup
      * @todo investigate: insert into on duplicate key update
@@ -104,7 +106,7 @@ class DatabaseSynchronizer
         $builder = $this->fromDB->table($table);
         $statement = $pdo->prepare($builder->toSql());
 
-        if (!$statement instanceof  \PDOStatement) {
+        if (! $statement instanceof  \PDOStatement) {
             return;
         }
 
@@ -124,9 +126,9 @@ class DatabaseSynchronizer
             $exists = $this->getToDb()->table($table)->where($queryColumn, $row->{$queryColumn})->first();
 
             if (! $exists) {
-                $this->getToDb()->table($table)->insert((array)$row);
+                $this->getToDb()->table($table)->insert((array) $row);
             } else {
-                $this->getToDb()->table($table)->where($queryColumn, $row->{$queryColumn})->update((array)$row);
+                $this->getToDb()->table($table)->where($queryColumn, $row->{$queryColumn})->update((array) $row);
             }
 
             if (isset($bar)) {
