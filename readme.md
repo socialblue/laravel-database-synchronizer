@@ -53,7 +53,7 @@ If you discover any security related issues, please email author email instead o
 
 license. Please see the [license file](license.md) for more information.
 
-[ico-version]: https://img.shields.io/packagist/dt/mtolhuijs/laravel-database-synchronizer.svg?style=flat-square
+[ico-version]: https://img.shields.io/packagist/v/Mtolhuijs/laravel-database-synchronizer.svg?style=flat-square
 [ico-downloads]: https://img.shields.io/packagist/dt/mtolhuijs/laravel-database-synchronizer.svg?style=flat-square
 [ico-travis]: https://api.travis-ci.com/mtolhuys/laravel-database-synchronizer.svg?branch=master
 [ico-styleci]: https://styleci.io/repos/177603107/shield
@@ -61,7 +61,7 @@ license. Please see the [license file](license.md) for more information.
 
 [link-packagist]: https://packagist.org/packages/mtolhuijs/laravel-database-synchronizer
 [link-downloads]: https://packagist.org/packages/mtolhuijs/laravel-database-synchronizer
-[link-travis]: https://travis-ci.org/mtolhuijs/laravel-database-synchronizer
+[link-travis]: https://travis-ci.org/mtolhuys/laravel-database-synchronizer
 [link-styleci]: https://styleci.io/repos/177603107
 [link-scrutinizer]: https://scrutinizer-ci.com/g/mtolhuys/laravel-database-synchronizer/?branch=master
 

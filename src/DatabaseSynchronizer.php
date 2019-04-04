@@ -5,6 +5,8 @@ namespace mtolhuijs\LDS;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\ConnectionInterface;
+use mtolhuijs\LDS\Exceptions\DatabaseConnectionException;
 
 class DatabaseSynchronizer
 {
@@ -16,6 +18,7 @@ class DatabaseSynchronizer
     public $skipTables;
     public $from;
     public $to;
+    public $truncate;
 
     private $fromDB;
     private $toDB;
@@ -24,43 +27,49 @@ class DatabaseSynchronizer
     {
         $this->from = $from;
         $this->to = $to;
-
-        if ($cli) {
-            $this->cli = $cli;
-        }
+        $this->cli = $cli;
 
         try {
             $this->fromDB = DB::connection($this->from);
             $this->toDB = DB::connection($this->to);
         } catch (\Exception $e) {
-            $this->feedback($e->getMessage(), 'error');
-
-            exit();
+            throw new DatabaseConnectionException($e->getMessage());
         }
     }
 
-    public function setSkipTables($skipTables)
+    public function setSkipTables(array $skipTables)
     {
         $this->skipTables = $skipTables;
 
         return $this;
     }
 
-    public function setTables($tables)
+    public function setTables(array $tables)
     {
         $this->tables = $tables;
 
         return $this;
     }
 
-    public function setLimit($limit)
+    public function setLimit(int $limit)
     {
         $this->limit = $limit;
 
         return $this;
     }
 
-    protected function getFromDb()
+    public function setOptions(array $options)
+    {
+        foreach ($options as $option => $value) {
+            if (! isset($this->{$option})) {
+                $this->{$option} = $value;
+            }
+        }
+
+        return $this;
+    }
+
+    protected function getFromDb(): ConnectionInterface
     {
         if ($this->fromDB === null) {
             $this->fromDB = DB::connection($this->from);
@@ -69,7 +78,7 @@ class DatabaseSynchronizer
         return $this->fromDB;
     }
 
-    protected function getToDb()
+    protected function getToDb(): ConnectionInterface
     {
         if ($this->toDB === null) {
             $this->toDB = DB::connection($this->to);
@@ -78,10 +87,27 @@ class DatabaseSynchronizer
         return $this->toDB;
     }
 
+    public function getTables(): array
+    {
+        if (empty($this->tables)) {
+            $this->tables = $this->getFromDb()->getDoctrineSchemaManager()->listTableNames();
+        }
+
+        return array_filter($this->tables, function ($table) {
+            return !in_array($table, $this->skipTables, true);
+        });
+    }
+
     public function run(): void
     {
         foreach ($this->getTables() as $table) {
             $this->feedback(PHP_EOL.PHP_EOL."Table: $table", 'line');
+
+            if (! Schema::connection($this->from)->hasTable($table)) {
+                $this->feedback("Table '$table' does not exist in $this->from", 'error');
+
+                continue;
+            }
 
             $this->syncTable($table);
             $this->syncRows($table);
@@ -124,7 +150,7 @@ class DatabaseSynchronizer
      */
     public function syncRows(string $table): void
     {
-        $queryColumn = $this->getFromDb()->getColumnListing($table)[0];
+        $queryColumn = Schema::connection($this->from)->getColumnListing($table)[0];
         $pdo = $this->getFromDb()->getPdo();
 
         $builder = $this->fromDB->table($table);
@@ -146,6 +172,10 @@ class DatabaseSynchronizer
             }
         }
 
+        if ($this->truncate) {
+            $this->getToDb()->table($table)->truncate();
+        }
+
         while ($row = $statement->fetch(\PDO::FETCH_OBJ)) {
             $exists = $this->getToDb()->table($table)->where($queryColumn, $row->{$queryColumn})->first();
 
@@ -163,19 +193,6 @@ class DatabaseSynchronizer
         if (isset($bar)) {
             $bar->finish();
         }
-    }
-
-    public function getTables(): array
-    {
-        if (empty($this->tables)) {
-            $this->tables = $this->getFromDb()->getDoctrineSchemaManager()->listTableNames();
-        }
-
-        $skipTables = $this->skipTables;
-
-        return array_filter($this->tables, function ($val) use ($skipTables) {
-            return ! in_array($val, $skipTables);
-        });
     }
 
     private function createTable(string $table, array $columns): void

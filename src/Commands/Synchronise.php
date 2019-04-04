@@ -4,6 +4,7 @@ namespace mtolhuijs\LDS\Commands;
 
 use Illuminate\Console\Command;
 use mtolhuijs\LDS\DatabaseSynchronizer;
+use mtolhuijs\LDS\Exceptions\DatabaseConnectionException;
 
 class Synchronise extends Command
 {
@@ -17,7 +18,9 @@ class Synchronise extends Command
         { --from= : Synchronize data from this database instead of the one specified in config }
         { --to= : Synchronize data to this database instead of the one specified in config }
         { --t|tables=* : Only run for given table(s) }
+        { --st|skip-tables=* : Skip given table(s) }
         { --l|limit= : Limit query rows (defaults to 5000) }
+        { --truncate : Truncate before inserting data }
     ';
 
     /**
@@ -34,15 +37,40 @@ class Synchronise extends Command
      */
     public function handle()
     {
-        (new DatabaseSynchronizer(
-            $this->option('from') ?? config('database-synchronizer.from'),
-            $this->option('to') ?? config('database-synchronizer.to'),
-            $this
-        ))->setTables($this->option('tables') ?? config('database-synchronizer.tables', []))
-           ->setSkipTables($this->option('skip_tables') ?? config('database-synchronizer.skip_tables'))
-           ->setLimit($this->option('limit') ?? config('database-synchronizer.limit', DatabaseSynchronizer::DEFAULT_LIMIT))
-           ->run();
+        try {
+            (new DatabaseSynchronizer(
+                $this->option('from') ?? config('database-synchronizer.from'),
+                $this->option('to') ?? config('database-synchronizer.to'),
+                $this
+            ))
+                ->setTables($this->getTables())
+                ->setSkipTables($this->getSkipTables())
+                ->setLimit((int) $this->getLimit())
+                ->setOptions($this->options())
+                ->run();
+        } catch (DatabaseConnectionException $e) {
+            $this->error($e->getMessage());
 
-        $this->info(PHP_EOL.'Synchronization done!');
+            return;
+        }
+
+        $this->info(PHP_EOL . 'Synchronization done!');
+    }
+
+    private function getTables()
+    {
+        return empty($this->option('tables')) ?
+            config('database-synchronizer.tables') : $this->option('tables') ;
+    }
+
+    private function getSkipTables()
+    {
+        return empty($this->option('skip-tables')) ?
+            config('database-synchronizer.skip_tables') : $this->option('skip-tables') ;
+    }
+
+    private function getLimit()
+    {
+        return $this->option('limit') ?? config('database-synchronizer.limit', DatabaseSynchronizer::DEFAULT_LIMIT);
     }
 }
