@@ -72,8 +72,8 @@ class DatabaseSynchronizer
      */
     public function syncTable(string $table): void
     {
-        $schema = $this->getToDb();
-        $columns = $this->getFromDb()->getColumnListing($table);
+        $schema = Schema::connection($this->to);
+        $columns = Schema::connection($this->from)->getColumnListing($table);
 
         if ($schema->hasTable($table)) {
             foreach ($columns as $column) {
@@ -154,9 +154,9 @@ class DatabaseSynchronizer
     {
         $this->feedback("Creating '$this->to.$table' table", 'warn');
 
-        $this->getToDb()->create($table, function (Blueprint $table_bp) use($table, $columns) {
+        Schema::connection($this->to)->create($table, function (Blueprint $table_bp) use($table, $columns) {
             foreach ($columns as $column) {
-                $type = $this->getFromDb()->getColumnType($table, $column);
+                $type = Schema::connection($this->from)->getColumnType($table, $column);
 
                 $table_bp->{$type}($column)->nullable();
 
@@ -167,8 +167,8 @@ class DatabaseSynchronizer
 
     private function updateTable(string $table, string $column): void
     {
-        $this->getToDb()->table($table, function (Blueprint $table_bp) use ($table, $column) {
-            $type = $this->getFromDb()->getColumnType($table, $column);
+        Schema::connection($this->to)->table($table, function (Blueprint $table_bp) use ($table, $column) {
+            $type = Schema::connection($this->from)->getColumnType($table, $column);
 
             $table_bp->{$type}($column)->nullable();
 
