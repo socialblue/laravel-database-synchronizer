@@ -16,6 +16,10 @@ class DatabaseSynchronizerServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->bootForConsole();
         }
+
+        $this->publishes([
+            __DIR__.'/../config/database-synchronizer.php' => config_path('database-synchronizer.php'),
+        ]);
     }
 
     /**
