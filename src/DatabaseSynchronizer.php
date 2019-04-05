@@ -177,7 +177,7 @@ class DatabaseSynchronizer
      * @param string $table
      * @return \PDOStatement
      */
-    private function prepareForInserts(string $table)
+    private function prepareForInserts(string $table): \PDOStatement
     {
         $pdo = $this->getFromDb()->getPdo();
         $builder = $this->fromDB->table($table);

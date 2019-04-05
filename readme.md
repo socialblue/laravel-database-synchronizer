@@ -19,11 +19,14 @@ Via Composer
 $ composer require mtolhuijs/laravel-database-synchronizer
 ```
 
+*Optionally* you can run `php artisan vendor:publish --provider mtolhuijs\LDS\DatabaseSynchronizerServiceProvider` 
+which will create a config file in the root config folder to adjust the behavior of the package.
+
 ## Usage
 
 This package comes with 1 command: 
 
-- `php artisan db:sync` Synchronizes your "from" database with you're "to" database
+- `php artisan db:sync` Synchronizes your "from" database with your "to" database
 ```
 db:sync
 { --from= : Synchronize data from this database instead of the one specified in config }
