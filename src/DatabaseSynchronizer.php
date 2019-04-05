@@ -2,6 +2,7 @@
 
 namespace mtolhuijs\LDS;
 
+use PDOException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
@@ -151,30 +152,7 @@ class DatabaseSynchronizer
     public function syncRows(string $table): void
     {
         $queryColumn = Schema::connection($this->from)->getColumnListing($table)[0];
-        $pdo = $this->getFromDb()->getPdo();
-
-        $builder = $this->fromDB->table($table);
-        $statement = $pdo->prepare($builder->toSql());
-
-        if (! $statement instanceof  \PDOStatement) {
-            return;
-        }
-
-        $statement->execute($builder->getBindings());
-        $amount = $statement->rowCount();
-
-        if ($this->cli) {
-            if ($amount > 0) {
-                $this->feedback("Synchronizing '$this->to.$table' rows", 'comment');
-                $bar = $this->cli->getOutput()->createProgressBar($amount);
-            } else {
-                $this->feedback('No rows...', 'comment');
-            }
-        }
-
-        if ($this->truncate) {
-            $this->getToDb()->table($table)->truncate();
-        }
+        $statement = $this->prepareForInserts($table);
 
         while ($row = $statement->fetch(\PDO::FETCH_OBJ)) {
             $exists = $this->getToDb()->table($table)->where($queryColumn, $row->{$queryColumn})->first();
@@ -185,14 +163,47 @@ class DatabaseSynchronizer
                 $this->getToDb()->table($table)->where($queryColumn, $row->{$queryColumn})->update((array) $row);
             }
 
-            if (isset($bar)) {
-                $bar->advance();
+            if ($this->cli) {
+                $this->cli->progressBar->advance();
             }
         }
 
-        if (isset($bar)) {
-            $bar->finish();
+        if ($this->cli) {
+            $this->cli->progressBar->finish();
         }
+    }
+
+    /**
+     * @param string $table
+     * @return \PDOStatement
+     */
+    private function prepareForInserts(string $table)
+    {
+        $pdo = $this->getFromDb()->getPdo();
+        $builder = $this->fromDB->table($table);
+        $statement = $pdo->prepare($builder->toSql());
+
+        if (! $statement instanceof \PDOStatement) {
+            throw new PDOException("Could not prepare PDOStatement for $table");
+        }
+
+        $statement->execute($builder->getBindings());
+        $amount = $statement->rowCount();
+
+        if ($this->cli) {
+            if ($amount > 0) {
+                $this->feedback("Synchronizing '$this->to.$table' rows", 'comment');
+                $this->cli->progressBar = $this->cli->getOutput()->createProgressBar($amount);
+            } else {
+                $this->feedback('No rows...', 'comment');
+            }
+        }
+
+        if ($this->truncate) {
+            $this->getToDb()->table($table)->truncate();
+        }
+
+        return $statement;
     }
 
     private function createTable(string $table, array $columns): void
