@@ -28,7 +28,7 @@ class Synchronise extends Command
      *
      * @var string
      */
-    protected $description = 'Synchronizes your \'from\' database with you\'re \'to\' database';
+    protected $description = 'Synchronizes your \'from\' database with your \'to\' database';
 
     /**
      * Execute the console command.
