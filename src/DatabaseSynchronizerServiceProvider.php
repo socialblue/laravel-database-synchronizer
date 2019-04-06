@@ -18,7 +18,7 @@ class DatabaseSynchronizerServiceProvider extends ServiceProvider
         }
 
         $this->publishes([
-            __DIR__ . '/../config/database-synchronizer.php' => config_path('database-synchronizer.php'),
+            __DIR__.'/../config/database-synchronizer.php' => config_path('database-synchronizer.php'),
         ]);
     }
 
@@ -29,7 +29,7 @@ class DatabaseSynchronizerServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->mergeConfigFrom(__DIR__ . '/../config/database-synchronizer.php', 'database-synchronizer');
+        $this->mergeConfigFrom(__DIR__.'/../config/database-synchronizer.php', 'database-synchronizer');
     }
 
     /**
