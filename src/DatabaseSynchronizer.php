@@ -43,8 +43,8 @@ class DatabaseSynchronizer
     public function run(): void
     {
         if ($this->migrate) {
-            Artisan::call('migrate' . ($this->truncate ? ':refresh' : ''), [
-                '--database' => $this->to
+            Artisan::call('migrate'.($this->truncate ? ':refresh' : ''), [
+                '--database' => $this->to,
             ]);
         }
 
