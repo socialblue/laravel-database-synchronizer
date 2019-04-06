@@ -20,6 +20,7 @@ class Synchronise extends Command
         { --t|tables=* : Only run for given table(s) }
         { --st|skip-tables=* : Skip given table(s) }
         { --l|limit= : Limit query rows (defaults to 5000) }
+        { --m|migrate : Run migrations before synchronization }
         { --truncate : Truncate before inserting data }
     ';
 
