@@ -5,6 +5,7 @@ namespace mtolhuijs\LDS;
 use PDOException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\ConnectionInterface;
 use mtolhuijs\LDS\Exceptions\DatabaseConnectionException;
@@ -17,6 +18,7 @@ class DatabaseSynchronizer
     public $limit = self::DEFAULT_LIMIT;
     public $tables;
     public $skipTables;
+    public $migrate;
     public $from;
     public $to;
     public $truncate;
@@ -36,6 +38,54 @@ class DatabaseSynchronizer
         } catch (\Exception $e) {
             throw new DatabaseConnectionException($e->getMessage());
         }
+    }
+
+    public function run(): void
+    {
+        if ($this->migrate) {
+            Artisan::call('migrate'.($this->truncate ? ':refresh' : ''), [
+                '--database' => $this->to,
+            ]);
+        }
+
+        foreach ($this->getTables() as $table) {
+            $this->feedback(PHP_EOL.PHP_EOL."Table: $table", 'line');
+
+            if (! Schema::connection($this->from)->hasTable($table)) {
+                $this->feedback("Table '$table' does not exist in $this->from", 'error');
+
+                continue;
+            }
+
+            $this->syncTable($table);
+            $this->syncRows($table);
+        }
+    }
+
+    private function createTable(string $table, array $columns): void
+    {
+        $this->feedback("Creating '$this->to.$table' table", 'warn');
+
+        Schema::connection($this->to)->create($table, function (Blueprint $table_bp) use ($table, $columns) {
+            foreach ($columns as $column) {
+                $type = Schema::connection($this->from)->getColumnType($table, $column);
+
+                $table_bp->{$type}($column)->nullable();
+
+                $this->feedback("Added {$type}('$column')->nullable()");
+            }
+        });
+    }
+
+    private function updateTable(string $table, string $column): void
+    {
+        Schema::connection($this->to)->table($table, function (Blueprint $table_bp) use ($table, $column) {
+            $type = Schema::connection($this->from)->getColumnType($table, $column);
+
+            $table_bp->{$type}($column)->nullable();
+
+            $this->feedback("Added {$type}('$column')->nullable()");
+        });
     }
 
     public function setSkipTables(array $skipTables)
@@ -97,22 +147,6 @@ class DatabaseSynchronizer
         return array_filter($this->tables, function ($table) {
             return ! in_array($table, $this->skipTables, true);
         });
-    }
-
-    public function run(): void
-    {
-        foreach ($this->getTables() as $table) {
-            $this->feedback(PHP_EOL.PHP_EOL."Table: $table", 'line');
-
-            if (! Schema::connection($this->from)->hasTable($table)) {
-                $this->feedback("Table '$table' does not exist in $this->from", 'error');
-
-                continue;
-            }
-
-            $this->syncTable($table);
-            $this->syncRows($table);
-        }
     }
 
     /**
@@ -204,32 +238,6 @@ class DatabaseSynchronizer
         }
 
         return $statement;
-    }
-
-    private function createTable(string $table, array $columns): void
-    {
-        $this->feedback("Creating '$this->to.$table' table", 'warn');
-
-        Schema::connection($this->to)->create($table, function (Blueprint $table_bp) use ($table, $columns) {
-            foreach ($columns as $column) {
-                $type = Schema::connection($this->from)->getColumnType($table, $column);
-
-                $table_bp->{$type}($column)->nullable();
-
-                $this->feedback("Added {$type}('$column')->nullable()");
-            }
-        });
-    }
-
-    private function updateTable(string $table, string $column): void
-    {
-        Schema::connection($this->to)->table($table, function (Blueprint $table_bp) use ($table, $column) {
-            $type = Schema::connection($this->from)->getColumnType($table, $column);
-
-            $table_bp->{$type}($column)->nullable();
-
-            $this->feedback("Added {$type}('$column')->nullable()");
-        });
     }
 
     private function feedback(string $msg, $type = 'info'): void
