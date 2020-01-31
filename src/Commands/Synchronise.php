@@ -54,8 +54,6 @@ class Synchronise extends Command
 
             return;
         }
-
-        $this->info(PHP_EOL.'Synchronization done!');
     }
 
     private function getTables()

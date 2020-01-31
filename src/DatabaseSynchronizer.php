@@ -49,7 +49,8 @@ class DatabaseSynchronizer
             $this->feedback("origin($originHost) => target($targetHost)", 'line');
         } else {
             $this->feedback('Canceled!', 'warn');
-            abort(499);
+
+            return;
         }
 
         if ($this->migrate) {
@@ -70,6 +71,8 @@ class DatabaseSynchronizer
             $this->syncTable($table);
             $this->syncRows($table);
         }
+
+        $this->feedback('Synchronization done!', 'info');
     }
 
     private function createTable(string $table, array $columns): void
