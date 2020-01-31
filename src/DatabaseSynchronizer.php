@@ -42,6 +42,16 @@ class DatabaseSynchronizer
 
     public function run(): void
     {
+        $originHost = $this->fromDB->getConfig()['host'];
+        $targetHost = $this->toDB->getConfig()['host'];
+
+        if ($this->cli->confirm("Target host is set to $targetHost, continue?")) {
+            $this->feedback("origin($originHost) => target($targetHost)", 'line');
+        } else {
+            $this->feedback('Canceled!', 'warn');
+            abort(499);
+        }
+
         if ($this->migrate) {
             Artisan::call('migrate'.($this->truncate ? ':refresh' : ''), [
                 '--database' => $this->to,
