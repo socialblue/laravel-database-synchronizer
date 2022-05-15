@@ -22,6 +22,7 @@ class DatabaseSynchronizer
     public $from;
     public $to;
     public $truncate;
+    public $force;
 
     private $fromDB;
     private $toDB;
@@ -45,12 +46,16 @@ class DatabaseSynchronizer
         $originHost = $this->fromDB->getConfig()['host'];
         $targetHost = $this->toDB->getConfig()['host'];
 
-        if ($this->cli->confirm("Target host is set to $targetHost, continue?")) {
-            $this->feedback("origin($originHost) => target($targetHost)", 'line');
-        } else {
-            $this->feedback('Canceled!', 'warn');
+        $force = $this->force ?? config('database-synchronizer.force');
 
-            return;
+        if (!$force) {
+            if ($this->cli->confirm("Target host is set to $targetHost, continue?")) {
+                $this->feedback("origin($originHost) => target($targetHost)", 'line');
+            } else {
+                $this->feedback('Canceled!', 'warn');
+
+                return;
+            }
         }
 
         if ($this->migrate) {

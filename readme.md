@@ -35,6 +35,7 @@ db:sync
 { --st|skip-tables=* : Skip given table(s) }
 { --l|limit= : Limit query rows (defaults to 5000) }
 { --truncate : Truncate before inserting data }
+{ --force : Skip confirmation dialog }
 ```
 
 ## Change log

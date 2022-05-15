@@ -6,4 +6,5 @@ return [
     'tables' => [],
     'skip_tables' => [],
     'limit' => 5000,
+    'force' => false,
 ];
