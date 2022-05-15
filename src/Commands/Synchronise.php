@@ -22,6 +22,7 @@ class Synchronise extends Command
         { --l|limit= : Limit query rows (defaults to 5000) }
         { --m|migrate : Run migrations before synchronization }
         { --truncate : Truncate before inserting data }
+        { --force : Skip confirmation dialog }
     ';
 
     /**
